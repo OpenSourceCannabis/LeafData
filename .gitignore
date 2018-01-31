@@ -1,0 +1,13 @@
+/.bundle/
+/.yardoc
+/Gemfile.lock
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+
+LeafData_CREDENTIALS.md
+CONSOLE_REPLAY.md
+DATA_DUMP.md
