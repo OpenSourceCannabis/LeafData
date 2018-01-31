@@ -19,6 +19,10 @@ module LeafData
       self.response = self.class.get('/users',  headers: auth_headers)
     end
 
+    def get_inventory
+      self.response = self.class.get('/inventories',  headers: auth_headers)
+    end
+
     def signed_in?
     end
 
