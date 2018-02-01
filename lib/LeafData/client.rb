@@ -16,14 +16,27 @@ module LeafData
     end
 
     def get_users
-      self.response = self.class.get('/users',  headers: auth_headers)
+      self.response = self.class.get('/users', headers: auth_headers)
     end
 
     def get_inventory
-      self.response = self.class.get('/inventories',  headers: auth_headers)
+      self.response = self.class.get('/inventories', headers: auth_headers)
+    end
+
+    def post_results(body = {})
+      self.response = self.class.post('/lab_results', body: body, headers: auth_headers)
+    end
+
+    def update_results(body = {})
+      self.response = self.class.post('/lab_results/update', body: body, headers: auth_headers)
+    end
+
+    def delete_results(global_id)
+      self.response = self.class.delete('/lab_results/' + global_id, headers: auth_headers)
     end
 
     def signed_in?
+      true
     end
 
     private
