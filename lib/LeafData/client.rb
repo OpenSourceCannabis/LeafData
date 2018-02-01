@@ -39,7 +39,7 @@ module LeafData
       true
     end
 
-    private
+    # private
 
     def auth_headers
       {
