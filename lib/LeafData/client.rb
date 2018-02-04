@@ -15,12 +15,19 @@ module LeafData
       sign_in
     end
 
-    def get_users
-      self.response = self.class.get('/users', headers: auth_headers)
+    def get_users(filters = {})
+      self.response = self.class.get('/users' + parsed(filters), headers: auth_headers)
     end
 
-    def get_inventory
-      self.response = self.class.get('/inventories', headers: auth_headers)
+    def get_inventory(filters = {})
+      self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+    end
+
+    def has_results?(batch_id = nil)
+      raise LeafData::Errors::MissingParameter.new('You must pass `batch_id` to the `has_results?` method') unless batch_id
+      get_inventory(f_batch_id: batch_id)
+      raise LeafData::Errors::NotFound.new("Batch #{batch_id} not found") unless response['data'].any?
+      !response['data'].first['global_lab_result_id'].nil?
     end
 
     def post_results(body = {})
@@ -39,7 +46,12 @@ module LeafData
       true
     end
 
-    # private
+    private
+
+    def parsed(filters)
+      return '' unless filters.length
+      "?" + filters.each_pair.map{ |k,v| "#{k}=#{v}" }.join('&')
+    end
 
     def auth_headers
       {

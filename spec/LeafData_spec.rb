@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+# note - this set of specs is tied to the developer's API test account...
+# not a good idea, but... 'IT WORKS ON MY MACHINE' :) 
+
 describe LeafData do
   before(:each) { configure_client }
 
@@ -39,7 +42,8 @@ describe LeafData do
     client.get_users
 
     expect(client.response['error']).to be_nil
-    expect(client.response['data'].first['email']).to eq($spec_credentials['email'])
+    expect(client.response['data'].first['email'])
+      .to eq($spec_credentials['email'])
   end
 
   it 'communicates with the API to get inventory' do
@@ -47,6 +51,41 @@ describe LeafData do
     client.get_inventory
 
     expect(client.response['error']).to be_nil
+  end
+
+  it 'communicates with the API to get filtered inventory, zero results' do
+    client = LeafData::Client.new
+    client.get_inventory(f_batch_id: 'NON.EXISTING')
+
+    expect(client.response['error']).to be_nil
+    expect(client.response['total']).to eq(0)
+  end
+
+  it 'communicates with the API to get filtered inventory, one result' do
+    client = LeafData::Client.new
+    client.get_inventory(f_batch_id: 'WALPHARM1.BAHCA')
+
+    expect(client.response['error']).to be_nil
+    expect(client.response['total']).to eq(1)
+  end
+
+  it 'communicates with the API to find if lab results exist (true)' do
+    client = LeafData::Client.new
+
+    expect(client.has_results?('WALPHARM1.BAHCA')).to be_truthy
+  end
+
+  it 'communicates with the API to find if lab results exist (false)' do
+    client = LeafData::Client.new
+
+    expect(client.has_results?('WALPHARM1.BA128P')).to be_falsey
+  end
+
+  it 'communicates with the API to find if lab results exist (404)' do
+    client = LeafData::Client.new
+
+    expect{ client.has_results?('NON.EXISTING') }
+      .to raise_error(LeafData::Errors::NotFound)
   end
 
   it 'communicates with the API to post results, delete results' do

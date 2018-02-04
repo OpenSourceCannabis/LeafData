@@ -1,14 +1,21 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
+require 'yaml'
+
+$spec_credentials = YAML.load_file('./spec/spec_credentials.yml')
+
 require "LeafData"
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
+LeafData.configure do |config|
+  config.api_key  = $spec_credentials['api_key']
+  config.mme_code = $spec_credentials['mme_code']
+  config.base_uri = $spec_credentials['base_uri']
+  config.state    = $spec_credentials['state']
+end
 
-# (If you use this, don't forget to add pry to your Gemfile!)
+
+$client = LeafData::Client.new
+
 require "pry"
 Pry.start
-
-require "irb"
-IRB.start
