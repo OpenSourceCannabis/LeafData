@@ -23,10 +23,10 @@ module LeafData
       self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
     end
 
-    def has_results?(batch_id = nil)
-      raise LeafData::Errors::MissingParameter.new('You must pass `batch_id` to the `has_results?` method') unless batch_id
-      get_inventory(f_batch_id: batch_id)
-      raise LeafData::Errors::NotFound.new("Batch #{batch_id} not found") unless response['data'].any?
+    def has_results?(filters = {})
+      raise LeafData::Errors::MissingParameter.new('You must pass `batch_id` or `inventory_id` to the `has_results?(filters = {})` method') unless (filters.key?(:batch_id) || filters.key?(:inventory_id))
+      get_inventory({f_batch_id: filters[:batch_id], f_global_id: filters[:inventory_id]})
+      raise LeafData::Errors::NotFound.new("Sample not found") unless response['data'].any?
       !response['data'].first['global_lab_result_id'].nil?
     end
 

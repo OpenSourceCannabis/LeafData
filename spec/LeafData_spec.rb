@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 # note - this set of specs is tied to the developer's API test account...
-# not a good idea, but... 'IT WORKS ON MY MACHINE' :) 
+# not a good idea, but... 'IT WORKS ON MY MACHINE' :)
 
 describe LeafData do
   before(:each) { configure_client }
@@ -69,22 +69,41 @@ describe LeafData do
     expect(client.response['total']).to eq(1)
   end
 
-  it 'communicates with the API to find if lab results exist (true)' do
+  it 'communicates with the API to find if lab results by batch_id exist (true)' do
     client = LeafData::Client.new
 
-    expect(client.has_results?('WALPHARM1.BAHCA')).to be_truthy
+    expect(client.has_results?(batch_id: 'WALPHARM1.BAHCA')).to be_truthy
   end
 
-  it 'communicates with the API to find if lab results exist (false)' do
+  it 'communicates with the API to find if lab results by inventory_id exist (true)' do
     client = LeafData::Client.new
 
-    expect(client.has_results?('WALPHARM1.BA128P')).to be_falsey
+    expect(client.has_results?(inventory_id: 'WALPHARM1.INMFD')).to be_truthy
   end
 
-  it 'communicates with the API to find if lab results exist (404)' do
+  it 'communicates with the API to find if lab results by batch_id exist (false)' do
     client = LeafData::Client.new
 
-    expect{ client.has_results?('NON.EXISTING') }
+    expect(client.has_results?(batch_id: 'WALPHARM1.BA128P')).to be_falsey
+  end
+
+  it 'communicates with the API to find if lab results by inventory_id exist (false)' do
+    client = LeafData::Client.new
+
+    expect(client.has_results?(inventory_id: 'WALPHARM1.INN70')).to be_falsey
+  end
+
+  it 'communicates with the API to find if lab results exist by batch (404)' do
+    client = LeafData::Client.new
+
+    expect{ client.has_results?(batch_id: 'NON.EXISTING') }
+      .to raise_error(LeafData::Errors::NotFound)
+  end
+
+  it 'communicates with the API to find if lab results exist by inventory (404)' do
+    client = LeafData::Client.new
+
+    expect{ client.has_results?(inventory_id: 'NON.EXISTING') }
       .to raise_error(LeafData::Errors::NotFound)
   end
 
