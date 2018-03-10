@@ -85,6 +85,8 @@ describe LeafData do
     client = LeafData::Client.new
 
     expect(client.has_results?(batch_id: 'WALPHARM1.BA128P')).to be_falsey
+    expect(client.response.parsed_response['data'].first['global_id']).to eq('WALPHARM1.INN70')
+    expect(client.response.parsed_response['data'].first['global_batch_id']).to eq('WALPHARM1.BA128P')
   end
 
   it 'communicates with the API to find if lab results by inventory_id exist (false)' do
