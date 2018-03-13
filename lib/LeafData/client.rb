@@ -7,7 +7,8 @@ module LeafData
 
     attr_accessor :debug,
                   :response,
-                  :parsed_response
+                  :parsed_response,
+                  :lab_result_id
 
     def initialize(opts = {})
       self.debug = opts[:debug]
@@ -23,11 +24,13 @@ module LeafData
       self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
     end
 
+    #
     def has_results?(filters = {})
       raise LeafData::Errors::MissingParameter.new('You must pass `batch_id` or `inventory_id` to the `has_results?(filters = {})` method') unless (filters.key?(:batch_id) || filters.key?(:inventory_id))
       get_inventory({f_batch_id: filters[:batch_id], f_global_id: filters[:inventory_id]})
       raise LeafData::Errors::NotFound.new("Sample not found") unless response['data'].any?
-      !response['data'].first['global_lab_result_id'].nil?
+      self.lab_result_id = response['data'].first['global_lab_result_id']
+      !lab_result_id.nil?
     end
 
     def post_results(body = {})
@@ -40,6 +43,10 @@ module LeafData
 
     def delete_results(global_id)
       self.response = self.class.delete('/lab_results/' + global_id, headers: auth_headers)
+    end
+
+    def lab_result_uri
+      "#{configuration.base_uri.gsub(/api\/v1/,'lab_results/')}#{lab_result_id}"
     end
 
     def signed_in?
