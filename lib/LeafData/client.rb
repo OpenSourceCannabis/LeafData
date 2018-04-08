@@ -16,6 +16,14 @@ module LeafData
       sign_in
     end
 
+    ## CIM Common Interface Methods
+    ## Metrc / BioTrackTHC / LeafData
+
+    def retrieve(barcode)
+      get_inventory(f_global_id: barcode)
+      response.parsed_response['data'].first
+    end
+
     def get_users(filters = {})
       self.response = self.class.get('/users' + parsed(filters), headers: auth_headers)
     end
