@@ -24,12 +24,25 @@ module LeafData
       response.parsed_response['data'].first
     end
 
+    def retrieve_licensee(barcode)
+      if item = retrieve(barcode)
+        get_mme(item['global_original_id'])
+      else
+        nil
+      end
+    end
+
     def get_users(filters = {})
       self.response = self.class.get('/users' + parsed(filters), headers: auth_headers)
     end
 
     def get_inventory(filters = {})
       self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+    end
+
+    def get_mme(mme_code)
+      mme_code = mme_code.split('.').first[2..-1]
+      self.response = self.class.get('/mmes/' + mme_code, headers: auth_headers)
     end
 
     def has_results?(opts = {})
