@@ -45,12 +45,9 @@ module LeafData
       self.response = self.class.get('/mmes/' + mme_code, headers: auth_headers)
     end
 
-    def has_results?(opts = {})
-      raise LeafData::Errors::MissingParameter.new('You must pass `batch_id` or `inventory_id` to the `has_results?(filters = {})` method') unless (opts.key?(:batch_id) || opts.key?(:inventory_id))
-      filters = {}
-      filters[:f_batch_id] = opts[:batch_id] if opts.key?(:batch_id) && !opts[:batch_id].empty?
-      filters[:f_global_id] = opts[:inventory_id] if opts.key?(:inventory_id) && !opts[:inventory_id].empty?
-      get_inventory(filters)
+    def has_results?(barcode=nil)
+      raise LeafData::Errors::MissingParameter.new('You must pass `barcode` to the `has_results?(barcode)` method') unless barcode
+      retrieve(barcode)
       raise LeafData::Errors::NotFound.new("Sample not found") unless response['data'].any?
       self.lab_result_id = nil
       self.lab_result_id = response['data'].first['global_lab_result_id']
