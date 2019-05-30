@@ -21,7 +21,13 @@ module LeafData
 
     def retrieve(barcode)
       get_inventory(f_global_id: barcode)
-      response.parsed_response['data'].first
+      return response['data'].first if response['total'] > 0
+
+      get_inventory(f_batch_id: barcode)
+      return response['data'].first if response['total'] > 0
+      
+      get_inventory
+      response['data'].find{|el| el['global_original_id'] == barcode }
     end
 
     def retrieve_licensee(barcode)
