@@ -26,10 +26,21 @@ module LeafData
       get_inventory(f_batch_id: barcode)
       return response['data'].first if response && response['total'] && response['total'] > 0
 
-      get_inventory
-      self.response['data'] = [response['data'].find{|el| el['global_original_id'] == barcode }].compact
+      get_inventory page: 999
 
-      response['data'].first
+      page = response['last_page']
+      data = false
+      while !data && page > 0
+        get_inventory(page: page)
+        if response['data'].respond_to? :values
+          data = response['data'].values.find{ |el| el['global_original_id'] == barcode }
+        else
+          data = response['data'].find{ |el| el['global_original_id'] == barcode }
+        end
+        page -= 1
+      end
+
+      self.response['data'] = [data].compact
     end
 
     def retrieve_licensee(barcode)
@@ -45,7 +56,9 @@ module LeafData
     end
 
     def get_inventory(filters = {})
+      puts 'GET /inventories' + parsed(filters)
       self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+      puts response
     end
 
     def get_mme(mme_code)
