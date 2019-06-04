@@ -39,8 +39,11 @@ module LeafData
         end
         page -= 1
       end
-
-      self.response['data'] = [data].compact
+      
+      if data
+        self.response['data'] = [data].compact
+        data
+      end
     end
 
     def retrieve_licensee(barcode)
@@ -56,9 +59,8 @@ module LeafData
     end
 
     def get_inventory(filters = {})
-      puts 'GET /inventories' + parsed(filters)
+      puts "\033[01;34mLeafDATA\033[00m GET /inventories" + parsed(filters)
       self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
-      puts response
     end
 
     def get_mme(mme_code)
