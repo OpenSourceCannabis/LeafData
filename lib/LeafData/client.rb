@@ -8,7 +8,8 @@ module LeafData
     attr_accessor :debug,
                   :response,
                   :parsed_response,
-                  :lab_result_id
+                  :lab_result_id,
+                  :inventory
 
     def initialize(opts = {})
       self.debug = opts[:debug]
@@ -20,11 +21,16 @@ module LeafData
     ## Metrc / BioTrackTHC / LeafData
 
     def retrieve(barcode)
-      get_inventory(f_global_id: barcode)
-      return response['data'].first if response && response['total'] && response['total'] > 0
 
-      get_inventory(f_batch_id: barcode)
-      return response['data'].first if response && response['total'] && response['total'] > 0
+      if barcode =~ /#{configuration.mme_code}\.IN/
+        get_inventory(f_global_id: barcode)
+        return response['data'].first if response && response['total'] && response['total'] > 0
+      end
+
+      if barcode =~ /#{configuration.mme_code}\.BA/
+        get_inventory(f_batch_id: barcode)
+        return response['data'].first if response && response['total'] && response['total'] > 0
+      end
 
       get_inventory page: 999
 
@@ -39,7 +45,7 @@ module LeafData
         end
         page -= 1
       end
-      
+
       if data
         self.response['data'] = [data].compact
         data
@@ -59,8 +65,18 @@ module LeafData
     end
 
     def get_inventory(filters = {})
-      puts "\033[01;34mLeafDATA\033[00m GET /inventories" + parsed(filters)
-      self.response = self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+      now = Time.now
+      requested_at = now.strftime('%j-%H-') + "#{now.min / 20}"
+      puts "\033[01;34mLeafDATA\033[00m GET /inventories" + parsed(filters) + " at #{requested_at}"
+
+      self.response = if filters.key?(:page)
+        self.inventory ||= {}
+        self.inventory[requested_at] = {} unless inventory.key?(requested_at)
+        self.inventory[requested_at][filters[:page]] ||= self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+        self.inventory[requested_at][filters[:page]]
+      else
+        self.class.get('/inventories' + parsed(filters), headers: auth_headers)
+      end
     end
 
     def get_mme(mme_code)
